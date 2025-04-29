@@ -13,7 +13,7 @@ int main() {
     screenUpdate();
 
     int ch = 0;
-    while (ch != 10) { // 10 é o ENTER
+    while (ch != 10) { 
         if (keyhit()) {
             ch = readch();
         }
