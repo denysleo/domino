@@ -5,7 +5,7 @@
 int main() {
     screenInit(1);
     keyboardInit();
-    timerInit(50);
+    timerInit(40);
 
     screenClear();
     screenSetColor(CYAN, BLACK);
