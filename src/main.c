@@ -1,19 +1,32 @@
 #include "screen.h"
 #include "keyboard.h"
 #include "timer.h"
-#include <stdio.h> 
+#include <stdio.h>
+#include "menu.h" 
+
 int main() {
     screenInit(1);
     keyboardInit();
     timerInit(50);
 
+
+    int escolha = menuInicial();
+
+
     screenClear();
     screenSetColor(CYAN, BLACK);
-    printf("Dominó das ruas\n");
+    if (escolha == 1) {
+        printf("Você escolheu a primeira opção\n");
+    } else if (escolha == 2) {
+        printf("Você escolheu a segunda opção\n");
+    } else if (escolha == 3) {
+        printf("Você escolheu a terceira opção\n");
+    }
     screenUpdate();
 
+
     int ch = 0;
-    while (ch != 10) { 
+    while (ch != 10) {
         if (keyhit()) {
             ch = readch();
         }
@@ -24,3 +37,4 @@ int main() {
     timerDestroy();
     return 0;
 }
+
