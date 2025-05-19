@@ -1,7 +1,9 @@
 #include "screen.h"
 #include "keyboard.h"
 #include "timer.h"
-#include <stdio.h> 
+#include "jogo.h"
+#include <stdio.h>
+
 int main() {
     screenInit(1);
     keyboardInit();
@@ -12,15 +14,11 @@ int main() {
     printf("Dominó das ruas\n");
     screenUpdate();
 
-    int ch = 0;
-    while (ch != 10) { 
-        if (keyhit()) {
-            ch = readch();
-        }
-    }
+    iniciarJogo();
 
     keyboardDestroy();
     screenDestroy();
     timerDestroy();
     return 0;
 }
+
