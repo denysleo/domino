@@ -7,7 +7,7 @@
 int main() {
     screenInit(1);
     keyboardInit();
-    timerInit(50);
+    timerInit(51);
 
 
     int escolha = menuInicial();
