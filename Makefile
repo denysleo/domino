@@ -1,10 +1,21 @@
-CC = gcc
-CFLAGS = -Wall -I./cli-lib/include -I./src
-LDFLAGS = -lncurses
+CC := gcc
+CFLAGS := -Wall -I. -I./include -I./cli-lib/include
+LIBS := -lncurses
 
-SRC = $(filter-out cli-lib/src/main.c, $(wildcard src/*.c cli-lib/src/*.c))
-OBJ = $(SRC:.c=.o)
-EXEC = domino
+PROJECT_SRC := \
+    jogador.c \
+    jogo.c \
+    pedra.c \
+    src/main.c
+
+CLI_SRC := \
+    cli-lib/src/screen.c \
+    cli-lib/src/keyboard.c \
+    cli-lib/src/timer.c
+
+SRC := $(PROJECT_SRC) $(CLI_SRC)
+OBJ := $(SRC:.c=.o)
+EXEC := domino
 
 all: $(EXEC)
 
@@ -12,8 +23,9 @@ all: $(EXEC)
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Linkando os objetos para criar o executável
 $(EXEC): $(OBJ)
-	$(CC) $(OBJ) -o $(EXEC) $(LDFLAGS)
+	$(CC) $(OBJ) -o $@ $(LIBS)
 
 clean:
 	rm -f $(OBJ) $(EXEC)

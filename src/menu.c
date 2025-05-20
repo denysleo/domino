@@ -19,7 +19,10 @@ int menuInicial() {
             else
                 screenSetColor(WHITE, BLACK);
 
-            printf("%d. Opção %d\n", i, i);
+            if (i == 1)
+                printf("%d. Iniciar Jogo\n", i);
+            else
+                printf("%d. Opção %d\n", i, i);
         }
 
         screenUpdate();
@@ -27,7 +30,7 @@ int menuInicial() {
         if (keyhit()) {
             tecla = readch();
 
-            if (tecla == 65 && opcao > 1) 
+            if (tecla == 65 && opcao > 1)
                 opcao--;
             else if (tecla == 66 && opcao < 3)
                 opcao++;
@@ -36,5 +39,4 @@ int menuInicial() {
 
     return opcao;
 }
-
 

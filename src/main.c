@@ -2,16 +2,15 @@
 #include "keyboard.h"
 #include "timer.h"
 #include <stdio.h>
-#include "menu.h" 
+#include "menu.h"
+#include "jogo.h"
 
 int main() {
     screenInit(1);
     keyboardInit();
     timerInit(51);
 
-
     int escolha = menuInicial();
-
 
     screenClear();
     screenSetColor(CYAN, BLACK);
@@ -22,8 +21,8 @@ int main() {
     } else if (escolha == 3) {
         printf("Você escolheu a terceira opção\n");
     }
-    screenUpdate();
 
+    screenUpdate();
 
     int ch = 0;
     while (ch != 10) {
@@ -31,6 +30,8 @@ int main() {
             ch = readch();
         }
     }
+
+    iniciarJogo();
 
     keyboardDestroy();
     screenDestroy();

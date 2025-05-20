@@ -1,4 +1,16 @@
-"eval \"$(ssh-agent -s)\""
-"eval \"$(ssh-agent -s)\".pub"
-*.pem
-*.pub
+build/
+
+*.o
+
+
+domino
+*.exe
+*.out
+
+*~
+*.swp
+
+
+*.log
+tmp/
+
