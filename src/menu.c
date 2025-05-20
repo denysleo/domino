@@ -1,35 +1,40 @@
-#include <stdio.h>
+#include "menu.h"
 #include "screen.h"
 #include "keyboard.h"
 #include "timer.h"
-#include "menu.h"
+#include <stdio.h>
 
-int menuInicial(void) {
-    int opcao = 0;
+int menuInicial() {
+    int opcao = 1;
+    int tecla = 0;
 
-    while (opcao < 1 || opcao > 3) {
+    while (tecla != 10) {  // 10 = ENTER
         screenClear();
-        screenSetColor(CYAN, BLACK);
-        printf("=== DOMINÓ DAS RUAS ===\n");
-        printf("1. Iniciar Jogo\n");
-        printf("2. Instruções\n");
-        printf("3. Sair\n");
-        printf("Escolha uma opção: ");
-        screenUpdate();
+        screenSetColor(WHITE, BLACK);
+        printf("===== MENU =====\n\n");
 
-        while (!keyhit()) {
-            timerSleep(10);
+        for (int i = 1; i <= 3; i++) {
+            if (i == opcao)
+                screenSetColor(YELLOW, BLACK);
+            else
+                screenSetColor(WHITE, BLACK);
+
+            printf("%d. Opção %d\n", i, i);
         }
 
-        int ch = readch();
-        opcao = ch - '0';
+        screenUpdate();
 
-        if (opcao < 1 || opcao > 3) {
-            printf("\nOpção inválida! Tente novamente.\n");
-            timerSleep(1000);
+        if (keyhit()) {
+            tecla = readch();
+
+            if (tecla == 65 && opcao > 1) 
+                opcao--;
+            else if (tecla == 66 && opcao < 3)
+                opcao++;
         }
     }
 
     return opcao;
 }
+
 
