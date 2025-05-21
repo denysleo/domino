@@ -15,7 +15,7 @@ int main() {
     screenClear();
     screenSetColor(CYAN, BLACK);
     if (escolha == 1) {
-        printf("Você escolheu a primeira opção\n");
+        iniciarJogo();
     } else if (escolha == 2) {
         printf("Você escolheu a segunda opção\n");
     } else if (escolha == 3) {
@@ -31,7 +31,6 @@ int main() {
         }
     }
 
-    iniciarJogo();
 
     keyboardDestroy();
     screenDestroy();
