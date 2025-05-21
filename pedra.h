@@ -9,5 +9,6 @@ typedef struct pedra {
 
 Pedra *criarPedra(int ladoA, int ladoB);
 Pedra *criarTodasAsPedras();
+void embaralharListaEncadeada(Pedra **headRef);
 
 #endif
