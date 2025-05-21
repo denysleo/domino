@@ -7,7 +7,8 @@ PROJECT_SRC := \
     jogo.c \
     src/menu.c \
     pedra.c \
-    src/main.c
+    src/main.c \
+    tabuleiro.c
 
 CLI_SRC := \
     cli-lib/src/screen.c \

@@ -2,6 +2,7 @@
 #define JOGADOR_H
 
 #include "pedra.h"
+#include "tabuleiro.h"
 
 typedef struct jogador {
     char nome[51];
@@ -11,7 +12,7 @@ typedef struct jogador {
 
 // Distribui as pedras embaralhadas para os 4 jogadores e retorna as pedras do dorme
 void distribuirPecas(Jogador *jogadores, Pedra *todas, Pedra **dorme);
-void controlarTurnos(Jogador *jogadores);
+void controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro);
 
 #endif
 
