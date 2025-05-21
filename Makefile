@@ -5,6 +5,7 @@ LIBS := -lncurses
 PROJECT_SRC := \
     jogador.c \
     jogo.c \
+    src/menu.c \
     pedra.c \
     src/main.c
 

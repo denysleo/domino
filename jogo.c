@@ -2,6 +2,7 @@
 #include "jogador.h"
 #include "pedra.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 void iniciarJogo() {
     Jogador jogadores[4];
