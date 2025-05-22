@@ -3,6 +3,7 @@
 #include "pedra.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "tabuleiro.h"
 
 void iniciarJogo() {
     Jogador jogadores[4];
@@ -10,7 +11,11 @@ void iniciarJogo() {
     embaralharListaEncadeada(&todas);
     Pedra *dorme = NULL;
     distribuirPecas(jogadores, todas, &dorme);
-    controlarTurnos(jogadores);
+
+    Tabuleiro tabuleiro;
+    iniciarTabuleiro(&tabuleiro);
+
+    controlarTurnos(jogadores, &tabuleiro);
 
     printf("Pedras do dorme:\n");
     Pedra *p = dorme;
@@ -20,4 +25,5 @@ void iniciarJogo() {
     }
     printf("\n");
 }
+
 
