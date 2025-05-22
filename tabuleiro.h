@@ -3,15 +3,16 @@
 
 #include "pedra.h"
 
-typedef struct {
-    Pedra **pecas;   // Array dinâmico de pedras no tabuleiro
-    int tamanho;     // Quantidade de pedras jogadas
-    int capacidade;  // Capacidade atual do array
+typedef struct tabuleiro {
+    Pedra *inicio;
+    Pedra *esquerda;
+    Pedra *direita;
 } Tabuleiro;
-
-void iniciarTabuleiro(Tabuleiro *tabuleiro);
+Tabuleiro *criarTabuleiro();
+void inicializarTabuleiro(Tabuleiro *tabuleiro);
+void adicionarNaEsquerda(Tabuleiro *tabuleiro, Pedra *pedra);
+void adicionarNaDireita(Tabuleiro *tabuleiro, Pedra *pedra);
+void exibirTabuleiro(Tabuleiro *tabuleiro);
 void adicionarPecaNoCentro(Tabuleiro *tabuleiro, Pedra *p);
-void exibirTabuleiro(const Tabuleiro *tabuleiro);
-
 #endif
 

@@ -1,55 +1,54 @@
 #include "tabuleiro.h"
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include "cli-lib/include/screen.h"  // para screenClear, screenSetColor etc.
+#include <stdio.h>
 
 #define MAX_PECAS_TABULEIRO 28
 #define CAPACIDADE_INICIAL 10
 
-
-void iniciarTabuleiro(Tabuleiro *tabuleiro) {
-    tabuleiro->pecas = (Pedra **)malloc(sizeof(Pedra *) * CAPACIDADE_INICIAL);
-    tabuleiro->tamanho = 0;
-    tabuleiro->capacidade = CAPACIDADE_INICIAL;
+Tabuleiro *criarTabuleiro() {
+    Tabuleiro *tabuleiro = malloc(sizeof(Tabuleiro));
+    tabuleiro->inicio = NULL;
+    tabuleiro->esquerda = NULL;
+    tabuleiro->direita = NULL;
+    return tabuleiro;
 }
-
+void inicializarTabuleiro(Tabuleiro *tabuleiro) {
+    tabuleiro->inicio = NULL;
+    tabuleiro->esquerda = NULL;
+    tabuleiro->direita = NULL;
+}
 
 void adicionarPecaNoCentro(Tabuleiro *tabuleiro, Pedra *p) {
-    // Expande array se necessário
-    if (tabuleiro->tamanho >= tabuleiro->capacidade) {
-        tabuleiro->capacidade *= 2;
-        tabuleiro->pecas = (Pedra **)realloc(tabuleiro->pecas, sizeof(Pedra *) * tabuleiro->capacidade);
-    }
-    // Inserir pedra no centro (primeira pedra)
-    // Como é a primeira, só adiciona
-    if (tabuleiro->tamanho == 0) {
-        tabuleiro->pecas[0] = p;
-        tabuleiro->tamanho = 1;
-        p->next = NULL; // garantia de fim de lista
-        return;
-    }
-
-    // Se já houver pedras, aqui poderia implementar lógica de colocar nas extremidades
-    // Por enquanto, vamos apenas adicionar no fim
-    tabuleiro->pecas[tabuleiro->tamanho] = p;
-    tabuleiro->tamanho++;
-    p->next = NULL;
+    tabuleiro->inicio = p;
+    tabuleiro->esquerda = p;
+    tabuleiro->direita = p;
+    p->esq = NULL;
+    p->dir = NULL;
 }
 
-void exibirTabuleiro(const Tabuleiro *tabuleiro) {
-    printf("Tabuleiro:\n");
+void adicionarNaEsquerda(Tabuleiro *tabuleiro, Pedra *p) {
+    p->dir = tabuleiro->esquerda;
+    if (tabuleiro->esquerda != NULL)
+        tabuleiro->esquerda->esq = p;
+    tabuleiro->esquerda = p;
+    if (tabuleiro->inicio == NULL)
+        tabuleiro->inicio = p;
+}
 
-    if (tabuleiro->tamanho == 0) {
-        printf("[vazio]\n");
-        return;
-    }
+void adicionarNaDireita(Tabuleiro *tabuleiro, Pedra *p) {
+    p->esq = tabuleiro->direita;
+    if (tabuleiro->direita != NULL)
+        tabuleiro->direita->dir = p;
+    tabuleiro->direita = p;
+    if (tabuleiro->inicio == NULL)
+        tabuleiro->inicio = p;
+}
 
-    // Imprime as pedras em linha, centralizadas na tela
-    // Para terminal simples, só imprime as pedras com espaços
-    for (int i = 0; i < tabuleiro->tamanho; i++) {
-        Pedra *p = tabuleiro->pecas[i];
-        printf("[%d|%d] ", p->ladoA, p->ladoB);
+void exibirTabuleiro(Tabuleiro *tabuleiro) {
+    Pedra *atual = tabuleiro->esquerda;
+    while (atual) {
+        printf("[%d|%d] ", atual->ladoA, atual->ladoB);
+        atual = atual->dir;
     }
     printf("\n");
 }

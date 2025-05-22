@@ -9,7 +9,7 @@ Pedra *criarPedra(int ladoA, int ladoB) {
     if (!nova) return NULL;
     nova->ladoA = ladoA;
     nova->ladoB = ladoB;
-    nova->next = NULL;
+    nova->dir = NULL;
     return nova;
 }
 
@@ -22,7 +22,7 @@ Pedra *criarTodasAsPedras() {
             if (!head) {
                 head = fim = nova;
             } else {
-                fim->next = nova;
+                fim->dir = nova;
                 fim = nova;
             }
         }
@@ -37,16 +37,13 @@ void embaralharListaEncadeada(Pedra **headRef) {
     int i = 0;
     Pedra *atual = *headRef;
 
-    // Copia os ponteiros para o array
     while (atual != NULL && i < TOTAL_PECAS) {
         array[i++] = atual;
-        atual = atual->next;
+        atual = atual->dir;
     }
 
-    // Inicializa o gerador de números aleatórios
     srand(time(NULL));
 
-    // Fisher-Yates shuffle
     for (int j = i - 1; j > 0; j--) {
         int k = rand() % (j + 1);
         Pedra *tmp = array[j];
@@ -54,13 +51,10 @@ void embaralharListaEncadeada(Pedra **headRef) {
         array[k] = tmp;
     }
 
-    // Reconecta os elementos da lista com a nova ordem
     for (int j = 0; j < i - 1; j++) {
-        array[j]->next = array[j + 1];
+        array[j]->dir = array[j + 1];
     }
-    array[i - 1]->next = NULL;
+    array[i - 1]->dir = NULL;
 
-    // Atualiza a cabeça da lista
     *headRef = array[0];
 }
-

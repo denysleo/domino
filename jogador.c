@@ -2,34 +2,18 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "tabuleiro.h"
-
+#include "jogo.h"
 void distribuirPecas(Jogador *jogadores, Pedra *todas, Pedra **dorme) {
+    int i = 0, j = 0;
     Pedra *ptr = todas;
-
-    // Inicializa jogadores: nome, pontuação e mão (lista vazia)
-    for (int j = 0; j < 4; j++) {
-        jogadores[j].mao = NULL;
-        jogadores[j].pontuacao = 0;
-        sprintf(jogadores[j].nome, "Jogador %d", j + 1);
+    while (ptr != NULL && i < 24) {
+        Pedra *nova = criarPedra(ptr->ladoA, ptr->ladoB);
+        nova->dir = jogadores[j].mao;
+        jogadores[j].mao = nova;
+        ptr = ptr->dir;
+        i++;
+        j = (j + 1) % NUM_JOGADORES;
     }
-
-    // Distribui 6 pedras para cada jogador, inserindo na cabeça da lista da mão
-    for (int k = 0; k < 6; k++) {
-        for (int j = 0; j < 4; j++) {
-            if (!ptr) {
-                // Caso raro: pedras acabaram antes do esperado
-                *dorme = NULL;
-                return;
-            }
-            Pedra *nova = ptr;
-            ptr = ptr->next;
-            nova->next = jogadores[j].mao;
-            jogadores[j].mao = nova;
-        }
-    }
-
-    // O restante das pedras é o dorme
-    *dorme = ptr;
 }
 
 void controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro) {
@@ -45,7 +29,7 @@ void controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro) {
                     maiorCarroca = valor;
                     goto encontrou;
                 }
-                m = m->next;
+                m = m->dir;
             }
         }
     }
@@ -61,7 +45,8 @@ encontrou:
     Pedra *m = jogadores[jogadorInicial].mao;
     while (m) {
         printf("[%d|%d] ", m->ladoA, m->ladoB);
-        m = m->next;
+        m = m->dir;
     }
     printf("\n\n");
 }
+

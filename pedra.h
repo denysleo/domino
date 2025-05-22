@@ -4,7 +4,8 @@
 typedef struct pedra {
     int ladoA;
     int ladoB;
-    struct pedra *next;
+    struct pedra *esq;
+    struct pedra *dir;
 } Pedra;
 
 Pedra *criarPedra(int ladoA, int ladoB);
