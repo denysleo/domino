@@ -7,12 +7,12 @@
 typedef struct jogador {
     char nome[51];
     int pontuacao;
-    Pedra *mao; // lista encadeada de pedras na mão do jogador
+    Pedra *mao;
 } Jogador;
 
-// Distribui as pedras embaralhadas para os 4 jogadores e retorna as pedras do dorme
 void distribuirPecas(Jogador *jogadores, Pedra *todas, Pedra **dorme);
-void controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro);
+int controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro);
+Pedra *removerPedraDaMao(Jogador *jogador, int ladoA, int ladoB);
+Pedra *selecionarPedraNaMao(Jogador *jogador, Tabuleiro *tabuleiro);
 
 #endif
-
