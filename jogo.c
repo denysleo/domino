@@ -183,6 +183,68 @@ int handlePlayStone(GameState *gameState, Jogador *jogadorAtual) {
             return 0;
         }
 
+        // NOVA MECÂNICA: Opção de girar a pedra
+        int querGirar = 0;
+        if (pedraJogada->ladoA != pedraJogada->ladoB) { // Só faz sentido girar se não for uma carroça
+            screenClear();
+            screenSetColor(WHITE, BLACK);
+            printf("Voce selecionou a pedra [%d|%d].\n", pedraJogada->ladoA, pedraJogada->ladoB);
+            printf("Deseja girar esta pedra (invertendo os lados)?\n");
+            printf("1. Sim (girar para [%d|%d])\n", pedraJogada->ladoB, pedraJogada->ladoA);
+            printf("2. Nao\n");
+            screenUpdate();
+
+            int opcaoGirar = 1; // 1 para Sim, 2 para Nao
+            int mudouGirar = 1;
+            int teclaGirar = 0;
+
+            while (teclaGirar != 10) {
+                if (mudouGirar) {
+                    screenClear();
+                    screenSetColor(WHITE, BLACK);
+                    printf("Voce selecionou a pedra [%d|%d].\n", pedraJogada->ladoA, pedraJogada->ladoB);
+                    printf("Deseja girar esta pedra (invertendo os lados)?\n");
+
+                    if (opcaoGirar == 1) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
+                    printf("1. Sim (girar para [%d|%d])\n", pedraJogada->ladoB, pedraJogada->ladoA);
+
+                    if (opcaoGirar == 2) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
+                    printf("2. Nao\n");
+
+                    printf("Use as setas CIMA/BAIXO para escolher. ENTER para confirmar.\n");
+                    screenUpdate();
+                    mudouGirar = 0;
+                }
+
+                if (keyhit()) {
+                    teclaGirar = readch();
+                    if (teclaGirar == 65 && opcaoGirar > 1) { // Seta Cima
+                        opcaoGirar--;
+                        mudouGirar = 1;
+                    } else if (teclaGirar == 66 && opcaoGirar < 2) { // Seta Baixo
+                        opcaoGirar++;
+                        mudouGirar = 1;
+                    }
+                }
+            }
+            querGirar = (opcaoGirar == 1);
+        }
+
+        if (querGirar) {
+            int temp = pedraJogada->ladoA;
+            pedraJogada->ladoA = pedraJogada->ladoB;
+            pedraJogada->ladoB = temp;
+            screenClear();
+            screenSetColor(GREEN, BLACK);
+            printf("Pedra girada para [%d|%d].\n", pedraJogada->ladoA, pedraJogada->ladoB);
+            screenSetColor(WHITE, BLACK);
+            screenUpdate();
+            printf("Pressione ENTER para continuar...\n");
+            while (readch() != 10);
+        }
+        // FIM DA NOVA MECÂNICA DE GIRAR
+
+
         int isWinningPlay = (jogadorAtual->mao->next == NULL && jogadorAtual->mao == pedraJogada);
         if (isWinningPlay && !isCompatible(pedraJogada, tabuleiro)) {
             screenClear();
@@ -251,19 +313,13 @@ int handlePlayStone(GameState *gameState, Jogador *jogadorAtual) {
         if (pedraRemovidaDaMao != NULL) {
             int jogadaFoiGato = !isCompatible(pedraRemovidaDaMao, tabuleiro);
 
+            // A lógica de girar já foi feita acima, então não precisamos mais disso aqui
+            // if (ladoEscolhido == 0 && jogadaFoiGato) { ... }
+            // if (ladoEscolhido == 1 && jogadaFoiGato) { ... }
+
             if (ladoEscolhido == 0) {
-                if (jogadaFoiGato) {
-                    int temp = pedraRemovidaDaMao->ladoA;
-                    pedraRemovidaDaMao->ladoA = pedraRemovidaDaMao->ladoB;
-                    pedraRemovidaDaMao->ladoB = temp;
-                }
                 adicionarPecaNoInicio(tabuleiro, pedraRemovidaDaMao);
             } else {
-                if (jogadaFoiGato) {
-                    int temp = pedraRemovidaDaMao->ladoA;
-                    pedraRemovidaDaMao->ladoA = pedraRemovidaDaMao->ladoB;
-                    pedraRemovidaDaMao->ladoB = temp;
-                }
                 adicionarPecaNoFim(tabuleiro, pedraRemovidaDaMao);
             }
             
