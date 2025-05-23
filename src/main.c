@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "menu.h"
 #include "jogo.h"
+#include "vencedores.h"
 
 int main() {
     screenInit(1);
@@ -17,7 +18,7 @@ int main() {
     if (escolha == 1) {
         iniciarJogo();
     } else if (escolha == 2) {
-        printf("Você escolheu a segunda opção\n");
+       mostrarUltimosVencedores();
     } else if (escolha == 3) {
         printf("Você escolheu a terceira opção\n");
     }

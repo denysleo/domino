@@ -7,6 +7,7 @@
 #include "tabuleiro.h"
 #include "cli-lib/include/screen.h"
 #include "cli-lib/include/keyboard.h"
+#include "vencedores.h"
 
 #define OPTION_REMOVE_GATO_AND_PLAY 1
 #define OPTION_PASS_TURN            2
@@ -22,10 +23,13 @@ int podeJogarPedra(const Pedra *pedra, const Tabuleiro *tabuleiro, int isWinning
 void getNomeDupla(int jogadorIndex, Jogador jogadores[4]) {
     if (jogadorIndex == 0 || jogadorIndex == 2) {
         printf("%s e %s VENCERAM!\n", jogadores[0].nome, jogadores[2].nome);
+        registrarVencedores(jogadores[0].nome, jogadores[2].nome);
     } else {
         printf("%s e %s VENCERAM!\n", jogadores[1].nome, jogadores[3].nome);
+        registrarVencedores(jogadores[1].nome, jogadores[3].nome);
     }
 }
+
 
 int menuEscolhaPrincipal(const GameState *gameState) {
     const Jogador *jogadorAtual = &gameState->jogadores[gameState->jogadorAtualIndex];

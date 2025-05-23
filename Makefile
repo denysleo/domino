@@ -5,10 +5,11 @@ LIBS := -lncurses
 PROJECT_SRC := \
     jogador.c \
     jogo.c \
-    src/menu.c \
+    menu.c \
     pedra.c \
     src/main.c \
-    tabuleiro.c
+    tabuleiro.c \
+    vencedores.c
 
 CLI_SRC := \
     cli-lib/src/screen.c \
