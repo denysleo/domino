@@ -7,6 +7,7 @@
 #include "tabuleiro.h"
 #include "cli-lib/include/screen.h"
 #include "cli-lib/include/keyboard.h"
+#include "menu.h"
 
 #define OPCAO_REMOVER_GATO 1
 #define OPCAO_JOGAR_PEDRA 2
@@ -260,9 +261,28 @@ int realizarJogada(GameState *gameState) {
         printf("Sua mao esta vazia. Nao ha pedras para jogar.\n");
         printf("Pressione ENTER para passar o turno.\n");
         screenUpdate();
-        while (readch() != 10);
+        int ch = 0;
+        while (ch != 10) {
+            if (keyhit()) {
+                ch = readch();
+                if (ch == 27) { 
+                    int opcao = menuPausa();
+                    if (opcao == 1) { 
+                        return 1;
+                    } else {
+                        ch = 0;
+                        screenClear();
+                        screenSetColor(WHITE, BLACK);
+                        printf("Sua mao esta vazia. Nao ha pedras para jogar.\n");
+                        printf("Pressione ENTER para passar o turno.\n");
+                        screenUpdate();
+                    }
+                }
+            }
+        }
         return 0;
     }
+
 
     int choiceHandled = 0;
     while (!choiceHandled) {
