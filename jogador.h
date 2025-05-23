@@ -15,10 +15,10 @@ typedef struct jogador {
 void distribuirPecas(Jogador *jogadores, Pedra *todas, Pedra **dorme);
 int controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro);
 Pedra *removerPedraDaMao(Jogador *jogador, int ladoA, int ladoB);
-Pedra *selecionarPedraNaMao(Jogador *jogador, const GameState *gameState);
+int selecionarPedraNaMao(Jogador *jogador, const GameState *gameState, Pedra **pedraSelecionadaPtr);
 void addPedraToMao(Jogador *jogador, Pedra *pedra);
-int calcularPontosDaMao(const Jogador *jogador);
 int getHandSize(const Jogador *jogador);
 int hasCompatibleMove(const Jogador *jogador, const Tabuleiro *tabuleiro);
+int calcularPontosDaMao(const Jogador *jogador);
 
 #endif
