@@ -39,12 +39,11 @@ int podeJogarPedra(const Pedra *pedra, const Tabuleiro *tabuleiro, int isWinning
     }
     return 1;
 }
-
-const char* getNomeDupla(int jogadorIndex) {
+void getNomeDupla(int jogadorIndex, Jogador jogadores[4]) {
     if (jogadorIndex == 0 || jogadorIndex == 2) {
-        return "Dupla Ímpar (Jogador 1 e Jogador 3)";
+        printf("%s e %s VENCERAM!\n", jogadores[0].nome, jogadores[2].nome);
     } else {
-        return "Dupla Par (Jogador 2 e Jogador 4)";
+        printf("%s e %s VENCERAM!\n", jogadores[1].nome, jogadores[3].nome);
     }
 }
 
@@ -379,7 +378,7 @@ void iniciarJogo() {
     if (gameState.jogadorVencedorIndex != -1) {
         screenSetColor(YELLOW, BLACK);
         printf("%s zerou a mao!\n", gameState.jogadores[gameState.jogadorVencedorIndex].nome);
-        printf("A dupla vencedora e: %s\n\n", getNomeDupla(gameState.jogadorVencedorIndex));
+        getNomeDupla(gameState.jogadorVencedorIndex, gameState.jogadores);
     } else {
         screenSetColor(RED, BLACK);
         printf("O jogo terminou por outro motivo.\n");

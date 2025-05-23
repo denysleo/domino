@@ -21,5 +21,6 @@ typedef struct game_state {
 
 void iniciarJogo();
 int realizarJogada(GameState *gameState);
+void getNomeDupla(int jogadorIndex, Jogador jogadores[4]);
 
 #endif

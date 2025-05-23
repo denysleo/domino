@@ -73,7 +73,8 @@ void distribuirPecas(Jogador *jogadores, Pedra *todas, Pedra **dorme) {
     for (int j = 0; j < 4; j++) {
         jogadores[j].mao = NULL;
         jogadores[j].pontuacao = 0;
-        sprintf(jogadores[j].nome, "Jogador %d", j + 1);
+        printf("Digite o nome do %d Jogador \n", j + 1);
+	scanf("%s",jogadores[j].nome);
     }
 
     for (int k = 0; k < 6; k++) {
