@@ -5,6 +5,7 @@
 #include "tabuleiro.h"
 #include "cli-lib/include/screen.h"
 #include "cli-lib/include/keyboard.h"
+#include "jogo.h"
 
 Pedra *removerPedraDaMao(Jogador *jogador, int ladoA, int ladoB) {
     Pedra *atual = jogador->mao;
@@ -26,6 +27,12 @@ Pedra *removerPedraDaMao(Jogador *jogador, int ladoA, int ladoB) {
         atual = atual->next;
     }
     return NULL;
+}
+
+void addPedraToMao(Jogador *jogador, Pedra *pedra) {
+    if (pedra == NULL) return;
+    pedra->next = jogador->mao;
+    jogador->mao = pedra;
 }
 
 int controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro) {
@@ -51,14 +58,11 @@ int controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro) {
 encontrou:
     if (jogadorInicial != -1 && pedraInicial != NULL) {
         printf("Jogador que inicia: %s (com a pedra [%d|%d])\n\n", jogadores[jogadorInicial].nome, maiorCarroca, maiorCarroca);
-
         adicionarPecaNoCentro(tabuleiro, pedraInicial);
-
         exibirTabuleiro(tabuleiro);
-
         return (jogadorInicial + 1) % 4;
     } else {
-        printf("Não foi possível encontrar a pedra inicial (carroça).\n");
+        printf("Nao foi possivel encontrar a pedra inicial (carroca).\n");
         return -1;
     }
 }
@@ -88,9 +92,9 @@ void distribuirPecas(Jogador *jogadores, Pedra *todas, Pedra **dorme) {
     *dorme = ptr;
 }
 
-Pedra *selecionarPedraNaMao(Jogador *jogador, Tabuleiro *tabuleiro) {
+Pedra *selecionarPedraNaMao(Jogador *jogador, const GameState *gameState) {
     if (jogador->mao == NULL) {
-        printf("Sua mão está vazia. Não há pedras para jogar.\n");
+        printf("Sua mao esta vazia. Nao ha pedras para jogar.\n");
         return NULL;
     }
 
@@ -103,8 +107,8 @@ Pedra *selecionarPedraNaMao(Jogador *jogador, Tabuleiro *tabuleiro) {
 
     Pedra **arrayPedras = (Pedra **)malloc(numPedras * sizeof(Pedra *));
     if (arrayPedras == NULL) {
-        printf("Erro de alocação de memória.\n");
-        return NULL;
+        fprintf(stderr, "Erro de alocacao de memoria (selecionarPedraNaMao).\n");
+        exit(EXIT_FAILURE);
     }
 
     current = jogador->mao;
@@ -124,10 +128,10 @@ Pedra *selecionarPedraNaMao(Jogador *jogador, Tabuleiro *tabuleiro) {
             
             printf("Turno de %s\n", jogador->nome);
             printf("Tabuleiro atual: ");
-            exibirTabuleiro(tabuleiro);
+            exibirTabuleiro(&gameState->tabuleiro);
             printf("\n");
 
-            printf("Mão de %s:\n", jogador->nome);
+            printf("Mao de %s:\n", jogador->nome);
             printf("Use as setas ESQUERDA/DIREITA para selecionar. ENTER para confirmar.\n\n");
 
             for (int i = 0; i < numPedras; i++) {
@@ -160,3 +164,4 @@ Pedra *selecionarPedraNaMao(Jogador *jogador, Tabuleiro *tabuleiro) {
     free(arrayPedras);
     return pedraSelecionada;
 }
+

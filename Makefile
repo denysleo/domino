@@ -21,14 +21,12 @@ EXEC := domino
 
 all: $(EXEC)
 
-# Regra para gerar .o a partir de .c
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Linkando os objetos para criar o executável
 $(EXEC): $(OBJ)
 	$(CC) $(OBJ) -o $@ $(LIBS)
 
 clean:
 	rm -f $(OBJ) $(EXEC)
-
+	rm -f src/*.o cli-lib/src/*.o
