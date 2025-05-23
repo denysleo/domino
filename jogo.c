@@ -105,6 +105,143 @@ int menuRemoverGatoOuJogar(const GameState *gameState) {
     return opcao;
 }
 
+int handlePlayStone(GameState *gameState, Jogador *jogadorAtual) {
+    Tabuleiro *tabuleiro = &gameState->tabuleiro;
+    Pedra *pedraJogada = NULL;
+    int playedThisStone = 0;
+
+    while(!playedThisStone) {
+        pedraJogada = selecionarPedraNaMao(jogadorAtual, gameState);
+
+        if (pedraJogada == NULL) {
+            screenClear();
+            screenSetColor(RED, BLACK);
+            printf("Erro na selecao da pedra. Nao foi possivel jogar.\n");
+            screenSetColor(WHITE, BLACK);
+            screenUpdate();
+            printf("Pressione ENTER para continuar...\n");
+            while (readch() != 10);
+            return 0;
+        }
+
+        int isWinningPlay = (jogadorAtual->mao->next == NULL && jogadorAtual->mao == pedraJogada);
+        if (!podeJogarPedra(pedraJogada, tabuleiro, isWinningPlay)) {
+             screenClear();
+             screenSetColor(RED, BLACK);
+             printf("Erro: A ultima pedra da mao DEVE ser compativel com o tabuleiro para vencer.\n");
+             screenSetColor(WHITE, BLACK);
+             screenUpdate();
+             printf("Pressione ENTER para tentar novamente...\n");
+             while (readch() != 10);
+             continue;
+        }
+
+        int ladoEscolhido = -1;
+
+        if (tabuleiro->tamanho == 0) {
+            printf("Erro interno: Tentando jogar a primeira pedra com tabuleiro vazio de forma inadequada.\n");
+            return 0;
+        } else {
+            screenClear();
+            screenSetColor(WHITE, BLACK);
+            printf("Voce escolheu a pedra [%d|%d].\n", pedraJogada->ladoA, pedraJogada->ladoB);
+            printf("Em qual lado do tabuleiro voce quer jogar?\n");
+            printf("1. Esquerdo (lado: %d)\n", getLadoEsquerdoTabuleiro(tabuleiro));
+            printf("2. Direito (lado: %d)\n", getLadoDireitoTabuleiro(tabuleiro));
+            printf("Use as setas CIMA/BAIXO para escolher. ENTER para confirmar.\n");
+            screenUpdate();
+
+            int opcaoLado = 1;
+            int mudouLado = 1;
+            int teclaLado = 0;
+
+            while (teclaLado != 10) {
+                if (mudouLado) {
+                    screenClear();
+                    screenSetColor(WHITE, BLACK);
+                    printf("Voce escolheu a pedra [%d|%d].\n", pedraJogada->ladoA, pedraJogada->ladoB);
+                    printf("Em qual lado do tabuleiro voce quer jogar?\n");
+
+                    if (opcaoLado == 1) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
+                    printf("1. Esquerdo (lado: %d)\n", getLadoEsquerdoTabuleiro(tabuleiro));
+
+                    if (opcaoLado == 2) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
+                    printf("2. Direito (lado: %d)\n", getLadoDireitoTabuleiro(tabuleiro));
+
+                    printf("Use as setas CIMA/BAIXO para escolher. ENTER para confirmar.\n");
+                    screenUpdate();
+                    mudouLado = 0;
+                }
+
+                if (keyhit()) {
+                    teclaLado = readch();
+                    if (teclaLado == 65 && opcaoLado > 1) {
+                        opcaoLado--;
+                        mudouLado = 1;
+                    } else if (teclaLado == 66 && opcaoLado < 2) {
+                        opcaoLado++;
+                        mudouLado = 1;
+                    }
+                }
+            }
+            ladoEscolhido = opcaoLado - 1;
+        }
+
+        Pedra *pedraRemovidaDaMao = removerPedraDaMao(jogadorAtual, pedraJogada->ladoA, pedraJogada->ladoB);
+        if (pedraRemovidaDaMao != NULL) {
+            int jogadaFoiGato = !isCompatible(pedraRemovidaDaMao, tabuleiro);
+
+            if (ladoEscolhido == 0) {
+                if (jogadaFoiGato) {
+                    int temp = pedraRemovidaDaMao->ladoA;
+                    pedraRemovidaDaMao->ladoA = pedraRemovidaDaMao->ladoB;
+                    pedraRemovidaDaMao->ladoB = temp;
+                }
+                adicionarPecaNoInicio(tabuleiro, pedraRemovidaDaMao);
+            } else {
+                if (jogadaFoiGato) {
+                    int temp = pedraRemovidaDaMao->ladoA;
+                    pedraRemovidaDaMao->ladoA = pedraRemovidaDaMao->ladoB;
+                    pedraRemovidaDaMao->ladoB = temp;
+                }
+                adicionarPecaNoFim(tabuleiro, pedraRemovidaDaMao);
+            }
+            
+            playedThisStone = 1;
+
+            gameState->lastPlayedSide = ladoEscolhido;
+            gameState->lastPlayedByPlayerIndex = gameState->jogadorAtualIndex;
+            gameState->lastPlayedWasGato = jogadaFoiGato;
+
+            screenClear();
+            screenSetColor(GREEN, BLACK);
+            printf("%s jogou a pedra [%d|%d].\n", jogadorAtual->nome, pedraRemovidaDaMao->ladoA, pedraRemovidaDaMao->ladoB);
+            if (jogadaFoiGato) {
+                printf("(Foi um GATO!)\n");
+            }
+            screenSetColor(WHITE, BLACK);
+            exibirTabuleiro(tabuleiro);
+            printf("\n");
+            screenUpdate();
+            printf("Pressione ENTER para continuar...\n");
+            while (readch() != 10);
+
+            if (jogadorAtual->mao == NULL) {
+                return 1;
+            }
+        } else {
+            screenClear();
+            screenSetColor(RED, BLACK);
+            printf("Erro ao remover a pedra da mao. Tente novamente.\n");
+            screenSetColor(WHITE, BLACK);
+            screenUpdate();
+            printf("Pressione ENTER para continuar...\n");
+            while (readch() != 10);
+        }
+    }
+    return 0;
+}
+
 
 int realizarJogada(GameState *gameState) {
     Jogador *jogadorAtual = &gameState->jogadores[gameState->jogadorAtualIndex];
@@ -117,10 +254,6 @@ int realizarJogada(GameState *gameState) {
     exibirTabuleiro(tabuleiro);
     printf("\n");
 
-    int jogadaFeita = 0;
-    int jogadorPassou = 0;
-    int escolheuRemoverGato = 0;
-
     if (jogadorAtual->mao == NULL) {
         screenClear();
         screenSetColor(WHITE, BLACK);
@@ -128,8 +261,11 @@ int realizarJogada(GameState *gameState) {
         printf("Pressione ENTER para passar o turno.\n");
         screenUpdate();
         while (readch() != 10);
-        jogadorPassou = 1;
-    } else {
+        return 0;
+    }
+
+    int choiceHandled = 0;
+    while (!choiceHandled) {
         int escolhaAcao = menuRemoverGatoOuJogar(gameState);
 
         if (escolhaAcao == OPCAO_REMOVER_GATO) {
@@ -158,163 +294,35 @@ int realizarJogada(GameState *gameState) {
                     exibirTabuleiro(tabuleiro);
                     printf("\n");
                     screenUpdate();
-                    printf("Pressione ENTER para continuar...\n");
+                    printf("Pressione ENTER para continuar e FAZER SUA JOGADA...\n");
                     while (readch() != 10);
-                    escolheuRemoverGato = 1;
+                    choiceHandled = 1;
                 } else {
                     screenClear();
                     screenSetColor(RED, BLACK);
                     printf("Erro ao remover o gato do tabuleiro. Tente novamente.\n");
                     screenSetColor(WHITE, BLACK);
                     screenUpdate();
-                    printf("Pressione ENTER para continuar...\n");
+                    printf("Pressione ENTER para continuar e escolher outra acao...\n");
                     while (readch() != 10);
-                    jogadorPassou = 1;
                 }
             } else {
                 screenClear();
                 screenSetColor(RED, BLACK);
-                printf("Nao ha um gato valido para remover ou nao e o seu turno.\n");
+                printf("Nao ha um gato valido para remover ou nao e o seu turno de remocao. Escolha outra acao.\n");
                 screenSetColor(WHITE, BLACK);
                 screenUpdate();
-                printf("Pressione ENTER para continuar...\n");
+                printf("Pressione ENTER para continuar e escolher outra acao...\n");
                 while (readch() != 10);
-                jogadorPassou = 1;
             }
+        } else {
+            choiceHandled = 1;
         }
     }
 
-
-    if (!escolheuRemoverGato && !jogadorPassou) {
-        Pedra *pedraJogada = NULL;
-        while (!jogadaFeita) {
-            pedraJogada = selecionarPedraNaMao(jogadorAtual, gameState);
-
-            if (pedraJogada == NULL) {
-                printf("Erro na selecao da pedra.\n");
-                break;
-            }
-
-            int isWinningPlay = (jogadorAtual->mao->next == NULL && jogadorAtual->mao == pedraJogada);
-            if (!podeJogarPedra(pedraJogada, tabuleiro, isWinningPlay)) {
-                 screenClear();
-                 screenSetColor(RED, BLACK);
-                 printf("Erro: A ultima pedra da mao DEVE ser compativel com o tabuleiro para vencer.\n");
-                 screenSetColor(WHITE, BLACK);
-                 printf("Pressione ENTER para tentar novamente...\n");
-                 screenUpdate();
-                 while (readch() != 10);
-                 continue;
-            }
-
-            int ladoEscolhido = -1;
-
-            if (tabuleiro->tamanho == 0) {
-                printf("Erro: A primeira pedra ja deveria ter sido jogada no inicio do jogo.\n");
-                break;
-            } else {
-                screenClear();
-                screenSetColor(WHITE, BLACK);
-                printf("Voce escolheu a pedra [%d|%d].\n", pedraJogada->ladoA, pedraJogada->ladoB);
-                printf("Em qual lado do tabuleiro voce quer jogar?\n");
-                printf("1. Esquerdo (lado: %d)\n", getLadoEsquerdoTabuleiro(tabuleiro));
-                printf("2. Direito (lado: %d)\n", getLadoDireitoTabuleiro(tabuleiro));
-                printf("Use as setas CIMA/BAIXO para escolher. ENTER para confirmar.\n");
-                screenUpdate();
-
-                int opcaoLado = 1;
-                int mudouLado = 1;
-                int teclaLado = 0;
-
-                while (teclaLado != 10) {
-                    if (mudouLado) {
-                        screenClear();
-                        screenSetColor(WHITE, BLACK);
-                        printf("Voce escolheu a pedra [%d|%d].\n", pedraJogada->ladoA, pedraJogada->ladoB);
-                        printf("Em qual lado do tabuleiro voce quer jogar?\n");
-
-                        if (opcaoLado == 1) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
-                        printf("1. Esquerdo (lado: %d)\n", getLadoEsquerdoTabuleiro(tabuleiro));
-
-                        if (opcaoLado == 2) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
-                        printf("2. Direito (lado: %d)\n", getLadoDireitoTabuleiro(tabuleiro));
-
-                        printf("Use as setas CIMA/BAIXO para escolher. ENTER para confirmar.\n");
-                        screenUpdate();
-                        mudouLado = 0;
-                    }
-
-                    if (keyhit()) {
-                        teclaLado = readch();
-                        if (teclaLado == 65 && opcaoLado > 1) {
-                            opcaoLado--;
-                            mudouLado = 1;
-                        } else if (teclaLado == 66 && opcaoLado < 2) {
-                            opcaoLado++;
-                            mudouLado = 1;
-                        }
-                    }
-                }
-                ladoEscolhido = opcaoLado - 1;
-            }
-
-            Pedra *pedraRemovidaDaMao = removerPedraDaMao(jogadorAtual, pedraJogada->ladoA, pedraJogada->ladoB);
-            if (pedraRemovidaDaMao != NULL) {
-                int jogadaFoiGato = !isCompatible(pedraRemovidaDaMao, tabuleiro);
-
-                if (ladoEscolhido == 0) {
-                    if (jogadaFoiGato) {
-                        int temp = pedraRemovidaDaMao->ladoA;
-                        pedraRemovidaDaMao->ladoA = pedraRemovidaDaMao->ladoB;
-                        pedraRemovidaDaMao->ladoB = temp;
-                    }
-                    adicionarPecaNoInicio(tabuleiro, pedraRemovidaDaMao);
-                } else {
-                    if (jogadaFoiGato) {
-                        int temp = pedraRemovidaDaMao->ladoA;
-                        pedraRemovidaDaMao->ladoA = pedraRemovidaDaMao->ladoB;
-                        pedraRemovidaDaMao->ladoB = temp;
-                    }
-                    adicionarPecaNoFim(tabuleiro, pedraRemovidaDaMao);
-                }
-                
-                jogadaFeita = 1;
-
-                gameState->lastPlayedSide = ladoEscolhido;
-                gameState->lastPlayedByPlayerIndex = gameState->jogadorAtualIndex;
-                gameState->lastPlayedWasGato = jogadaFoiGato;
-
-
-                screenClear();
-                screenSetColor(GREEN, BLACK);
-                printf("%s jogou a pedra [%d|%d].\n", jogadorAtual->nome, pedraRemovidaDaMao->ladoA, pedraRemovidaDaMao->ladoB);
-                if (jogadaFoiGato) {
-                    printf("(Foi um GATO!)\n");
-                }
-                screenSetColor(WHITE, BLACK);
-                exibirTabuleiro(tabuleiro);
-                printf("\n");
-                screenUpdate();
-                printf("Pressione ENTER para continuar...\n");
-                while (readch() != 10);
-
-                if (jogadorAtual->mao == NULL) {
-                    return 1;
-                }
-            } else {
-                screenClear();
-                screenSetColor(RED, BLACK);
-                printf("Erro ao remover a pedra da mao. Tente novamente.\n");
-                screenSetColor(WHITE, BLACK);
-                screenUpdate();
-                printf("Pressione ENTER para continuar...\n");
-                while (readch() != 10);
-            }
-        }
-    }
-
-    return 0;
+    return handlePlayStone(gameState, jogadorAtual);
 }
+
 
 void iniciarJogo() {
     GameState gameState;
@@ -380,18 +388,6 @@ void iniciarJogo() {
     printf("Pressione ENTER para finalizar...\n");
     screenUpdate();
     while (readch() != 10);
-
-    printf("Pedras do dorme:\n");
-    Pedra *p = gameState.dorme;
-    if (p == NULL) {
-        printf("[Dorme vazio]\n");
-    } else {
-        while (p) {
-            printf("[%d|%d] ", p->ladoA, p->ladoB);
-            p = p->next;
-        }
-    }
-    printf("\n");
 
     Pedra *temp;
     while(gameState.dorme != NULL){
