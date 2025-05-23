@@ -67,14 +67,44 @@ encontrou:
     }
 }
 
+// Função auxiliar para ler uma string no modo raw
+void readStringFromTerminal(char *buffer, int bufferSize) {
+    int i = 0;
+    int ch;
+    screenSetColor(WHITE, BLACK); // Garante que o texto digitado seja visível
+    screenUpdate(); // Atualiza a tela para que as cores sejam aplicadas
+
+    while (1) {
+        if (keyhit()) {
+            ch = readch();
+            if (ch == 10) { // ENTER
+                buffer[i] = '\0'; // Termina a string
+                break;
+            } else if (ch == 127 || ch == 8) { // BACKSPACE (127 para terminais Linux, 8 para Windows/outros)
+                if (i > 0) {
+                    i--;
+                    printf("\b \b"); // Move o cursor para trás, apaga o caractere, move para trás novamente
+                    fflush(stdout); // Garante que a saída é exibida imediatamente
+                }
+            } else if (i < bufferSize - 1) { // Garante que não excede o buffer
+                buffer[i++] = (char)ch;
+                printf("%c", (char)ch); // Ecoa o caractere digitado
+                fflush(stdout); // Garante que a saída é exibida imediatamente
+            }
+        }
+    }
+}
+
+
 void distribuirPecas(Jogador *jogadores, Pedra *todas, Pedra **dorme) {
     Pedra *ptr = todas;
 
     for (int j = 0; j < 4; j++) {
         jogadores[j].mao = NULL;
         jogadores[j].pontuacao = 0;
-        printf("Digite o nome do %d Jogador \n", j + 1);
-	    scanf("%s",jogadores[j].nome);
+        printf("Digite o nome do %d Jogador: ", j + 1); // Adicionado ':' para melhor visual
+        readStringFromTerminal(jogadores[j].nome, sizeof(jogadores[j].nome)); // Usando a nova função
+        printf("\n"); // Nova linha após a digitação do nome
     }
 
     for (int k = 0; k < 6; k++) {
