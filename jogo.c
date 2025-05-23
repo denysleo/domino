@@ -8,30 +8,9 @@
 #include "cli-lib/include/screen.h"
 #include "cli-lib/include/keyboard.h"
 
-#define OPCAO_REMOVER_GATO 1
-#define OPCAO_JOGAR_PEDRA 2
-
-int getLadoEsquerdoTabuleiro(const Tabuleiro *tabuleiro) {
-    if (tabuleiro->tamanho == 0) return -1;
-    return tabuleiro->pecas[0]->ladoA;
-}
-
-int getLadoDireitoTabuleiro(const Tabuleiro *tabuleiro) {
-    if (tabuleiro->tamanho == 0) return -1;
-    return tabuleiro->pecas[tabuleiro->tamanho - 1]->ladoB;
-}
-
-int isCompatible(const Pedra *pedra, const Tabuleiro *tabuleiro) {
-    if (tabuleiro->tamanho == 0) return 1;
-
-    int ladoEsquerdo = getLadoEsquerdoTabuleiro(tabuleiro);
-    int ladoDireito = getLadoDireitoTabuleiro(tabuleiro);
-
-    if (pedra->ladoA == ladoEsquerdo || pedra->ladoB == ladoEsquerdo) return 1;
-    if (pedra->ladoA == ladoDireito || pedra->ladoB == ladoDireito) return 1;
-
-    return 0;
-}
+#define OPTION_REMOVE_GATO_AND_PLAY 1
+#define OPTION_PASS_TURN            2
+#define OPTION_PLAY_STONE           3
 
 int podeJogarPedra(const Pedra *pedra, const Tabuleiro *tabuleiro, int isWinningPlay) {
     if (isWinningPlay) {
@@ -39,6 +18,7 @@ int podeJogarPedra(const Pedra *pedra, const Tabuleiro *tabuleiro, int isWinning
     }
     return 1;
 }
+
 void getNomeDupla(int jogadorIndex, Jogador jogadores[4]) {
     if (jogadorIndex == 0 || jogadorIndex == 2) {
         printf("%s e %s VENCERAM!\n", jogadores[0].nome, jogadores[2].nome);
@@ -47,40 +27,91 @@ void getNomeDupla(int jogadorIndex, Jogador jogadores[4]) {
     }
 }
 
-int menuRemoverGatoOuJogar(const GameState *gameState) {
-    int opcao = OPCAO_JOGAR_PEDRA;
+int menuEscolhaPrincipal(const GameState *gameState) {
+    const Jogador *jogadorAtual = &gameState->jogadores[gameState->jogadorAtualIndex];
+    const Tabuleiro *tabuleiro = &gameState->tabuleiro;
+    
+    int hasCompatible = hasCompatibleMove(jogadorAtual, tabuleiro);
+    int lastWasGatoByOpponent = (gameState->lastPlayedWasGato && gameState->lastPlayedByPlayerIndex != gameState->jogadorAtualIndex);
+
+    int selectedOption = 1;
     int tecla = 0;
     int mudou = 1;
+    int currentOptionNum = 1;
+
+    // Obter as pedras da mão do jogador para exibição
+    int numPedras = 0;
+    Pedra *current = jogadorAtual->mao;
+    while (current != NULL) {
+        numPedras++;
+        current = current->next;
+    }
+
+    Pedra **arrayPedras = NULL;
+    if (numPedras > 0) {
+        arrayPedras = (Pedra **)malloc(numPedras * sizeof(Pedra *));
+        if (arrayPedras == NULL) {
+            fprintf(stderr, "Erro de alocacao de memoria (menuEscolhaPrincipal).\n");
+            exit(EXIT_FAILURE);
+        }
+        current = jogadorAtual->mao;
+        for (int i = 0; i < numPedras; i++) {
+            arrayPedras[i] = current;
+            current = current->next;
+        }
+    }
+
 
     while (tecla != 10) {
         if (mudou) {
             screenClear();
             screenSetColor(WHITE, BLACK);
-            printf("Turno de %s\n", gameState->jogadores[gameState->jogadorAtualIndex].nome);
+            printf("Turno de %s\n", jogadorAtual->nome);
             printf("Tabuleiro atual: ");
-            exibirTabuleiro(&gameState->tabuleiro);
+            exibirTabuleiro(tabuleiro);
             printf("\n");
+
+            // Exibir a mão do jogador aqui
+            printf("Sua Mao:\n");
+            if (numPedras == 0) {
+                printf("[Vazia]\n");
+            } else {
+                for (int i = 0; i < numPedras; i++) {
+                    printf("[%d|%d] ", arrayPedras[i]->ladoA, arrayPedras[i]->ladoB);
+                }
+                printf("\n");
+            }
+            printf("\n"); // Espaçamento
 
             printf("Escolha sua acao:\n\n");
 
-            if (gameState->lastPlayedWasGato && gameState->lastPlayedByPlayerIndex != gameState->jogadorAtualIndex) {
-                if (opcao == OPCAO_REMOVER_GATO)
-                    screenSetColor(YELLOW, BLACK);
-                else
-                    screenSetColor(WHITE, BLACK);
-                printf("%d. Remover Gato (pedra jogada por %s)\n", OPCAO_REMOVER_GATO,
+            currentOptionNum = 1;
+
+            if (lastWasGatoByOpponent) {
+                if (selectedOption == currentOptionNum) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
+                printf("%d. Remover Gato (pedra jogada por %s)\n", currentOptionNum,
                        gameState->jogadores[gameState->lastPlayedByPlayerIndex].nome);
+                currentOptionNum++;
             } else {
                 screenSetColor(DARKGRAY, BLACK);
-                printf("1. Remover Gato (Nao disponivel no momento)\n");
+                printf(" . Remover Gato (Nao disponivel)\n");
             }
+            screenSetColor(WHITE, BLACK);
 
-            if (opcao == OPCAO_JOGAR_PEDRA)
-                screenSetColor(YELLOW, BLACK);
-            else
-                screenSetColor(WHITE, BLACK);
-            printf("%d. Jogar Pedra\n", OPCAO_JOGAR_PEDRA);
-            
+            if (!hasCompatible) {
+                if (selectedOption == currentOptionNum) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
+                printf("%d. Tocar (Passar o turno)\n", currentOptionNum);
+                currentOptionNum++;
+                if (selectedOption == currentOptionNum) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
+                printf("%d. Passar Gato (Jogar pedra incompativel)\n", currentOptionNum);
+                currentOptionNum++;
+            } else {
+                if (selectedOption == currentOptionNum) screenSetColor(YELLOW, BLACK); else screenSetColor(WHITE, BLACK);
+                printf("%d. Jogar Pedra\n", currentOptionNum);
+                currentOptionNum++;
+            }
+            screenSetColor(WHITE, BLACK);
+
             screenUpdate();
             mudou = 0;
         }
@@ -89,19 +120,48 @@ int menuRemoverGatoOuJogar(const GameState *gameState) {
             tecla = readch();
 
             if (tecla == 65) {
-                if (opcao == OPCAO_JOGAR_PEDRA && gameState->lastPlayedWasGato && gameState->lastPlayedByPlayerIndex != gameState->jogadorAtualIndex) {
-                    opcao = OPCAO_REMOVER_GATO;
+                if (selectedOption > 1) {
+                    selectedOption--;
                     mudou = 1;
                 }
             } else if (tecla == 66) {
-                if (opcao == OPCAO_REMOVER_GATO) {
-                    opcao = OPCAO_JOGAR_PEDRA;
+                if (selectedOption < currentOptionNum - 1) {
+                    selectedOption++;
                     mudou = 1;
                 }
             }
         }
     }
-    return opcao;
+
+    int finalChoice = -1;
+
+    int optionOffset = 0;
+    if (lastWasGatoByOpponent) {
+        if (selectedOption == 1) {
+            finalChoice = OPTION_REMOVE_GATO_AND_PLAY;
+        } else {
+            optionOffset = 1;
+        }
+    }
+
+    if (!hasCompatible) {
+        if (selectedOption == (1 + optionOffset)) {
+            finalChoice = OPTION_PASS_TURN;
+        } else if (selectedOption == (2 + optionOffset)) {
+            finalChoice = OPTION_PLAY_STONE;
+        }
+    } else {
+        if (selectedOption == (1 + optionOffset)) {
+            finalChoice = OPTION_PLAY_STONE;
+        }
+    }
+    
+    // Liberar a memória alocada para arrayPedras
+    if (arrayPedras != NULL) {
+        free(arrayPedras);
+    }
+
+    return finalChoice;
 }
 
 int handlePlayStone(GameState *gameState, Jogador *jogadorAtual) {
@@ -124,16 +184,17 @@ int handlePlayStone(GameState *gameState, Jogador *jogadorAtual) {
         }
 
         int isWinningPlay = (jogadorAtual->mao->next == NULL && jogadorAtual->mao == pedraJogada);
-        if (!podeJogarPedra(pedraJogada, tabuleiro, isWinningPlay)) {
-             screenClear();
-             screenSetColor(RED, BLACK);
-             printf("Erro: A ultima pedra da mao DEVE ser compativel com o tabuleiro para vencer.\n");
-             screenSetColor(WHITE, BLACK);
-             screenUpdate();
-             printf("Pressione ENTER para tentar novamente...\n");
-             while (readch() != 10);
-             continue;
+        if (isWinningPlay && !isCompatible(pedraJogada, tabuleiro)) {
+            screenClear();
+            screenSetColor(RED, BLACK);
+            printf("Erro: A ultima pedra da mao DEVE ser compativel com o tabuleiro para vencer.\n");
+            screenSetColor(WHITE, BLACK);
+            screenUpdate();
+            printf("Pressione ENTER para tentar novamente...\n");
+            while (readch() != 10);
+            continue;
         }
+
 
         int ladoEscolhido = -1;
 
@@ -212,6 +273,7 @@ int handlePlayStone(GameState *gameState, Jogador *jogadorAtual) {
             gameState->lastPlayedByPlayerIndex = gameState->jogadorAtualIndex;
             gameState->lastPlayedWasGato = jogadaFoiGato;
 
+
             screenClear();
             screenSetColor(GREEN, BLACK);
             printf("%s jogou a pedra [%d|%d].\n", jogadorAtual->nome, pedraRemovidaDaMao->ladoA, pedraRemovidaDaMao->ladoB);
@@ -241,7 +303,6 @@ int handlePlayStone(GameState *gameState, Jogador *jogadorAtual) {
     return 0;
 }
 
-
 int realizarJogada(GameState *gameState) {
     Jogador *jogadorAtual = &gameState->jogadores[gameState->jogadorAtualIndex];
     Tabuleiro *tabuleiro = &gameState->tabuleiro;
@@ -263,11 +324,25 @@ int realizarJogada(GameState *gameState) {
         return 0;
     }
 
-    int choiceHandled = 0;
-    while (!choiceHandled) {
-        int escolhaAcao = menuRemoverGatoOuJogar(gameState);
+    if (getHandSize(jogadorAtual) == 1 && !hasCompatibleMove(jogadorAtual, tabuleiro)) {
+        screenClear();
+        screenSetColor(WHITE, BLACK);
+        printf("%s so tem uma pedra ([%d|%d]) e ela nao se encaixa.\n",
+               jogadorAtual->nome, jogadorAtual->mao->ladoA, jogadorAtual->mao->ladoB);
+        printf("Toca automaticamente.\n");
+        screenUpdate();
+        printf("Pressione ENTER para passar o turno...\n");
+        while (readch() != 10);
+        return 0;
+    }
 
-        if (escolhaAcao == OPCAO_REMOVER_GATO) {
+    int finalActionChoice = -1;
+    int actionExecutedSuccessfully = 0;
+
+    while (!actionExecutedSuccessfully) {
+        finalActionChoice = menuEscolhaPrincipal(gameState);
+
+        if (finalActionChoice == OPTION_REMOVE_GATO_AND_PLAY) {
             if (gameState->lastPlayedWasGato && gameState->lastPlayedByPlayerIndex != gameState->jogadorAtualIndex) {
                 Pedra *pedraRemovidaDoTabuleiro = NULL;
                 Jogador *jogadorQueJogouGato = &gameState->jogadores[gameState->lastPlayedByPlayerIndex];
@@ -295,7 +370,7 @@ int realizarJogada(GameState *gameState) {
                     screenUpdate();
                     printf("Pressione ENTER para continuar e FAZER SUA JOGADA...\n");
                     while (readch() != 10);
-                    choiceHandled = 1;
+                    actionExecutedSuccessfully = 1;
                 } else {
                     screenClear();
                     screenSetColor(RED, BLACK);
@@ -308,20 +383,27 @@ int realizarJogada(GameState *gameState) {
             } else {
                 screenClear();
                 screenSetColor(RED, BLACK);
-                printf("Nao ha um gato valido para remover ou nao e o seu turno de remocao. Escolha outra acao.\n");
+                printf("Nao ha um gato valido para remover. Escolha outra acao.\n");
                 screenSetColor(WHITE, BLACK);
                 screenUpdate();
                 printf("Pressione ENTER para continuar e escolher outra acao...\n");
                 while (readch() != 10);
             }
-        } else {
-            choiceHandled = 1;
+        } else if (finalActionChoice == OPTION_PASS_TURN) {
+            screenClear();
+            screenSetColor(WHITE, BLACK);
+            printf("%s tocou (passou o turno).\n", jogadorAtual->nome);
+            screenUpdate();
+            printf("Pressione ENTER para passar o turno...\n");
+            while (readch() != 10);
+            return 0;
+        } else if (finalActionChoice == OPTION_PLAY_STONE) {
+            actionExecutedSuccessfully = 1;
         }
     }
 
     return handlePlayStone(gameState, jogadorAtual);
 }
-
 
 void iniciarJogo() {
     GameState gameState;
@@ -354,11 +436,9 @@ void iniciarJogo() {
         return;
     }
 
-
     printf("Iniciando o jogo. O primeiro a jogar e o: %s\n\n", gameState.jogadores[gameState.jogadorAtualIndex].nome);
     printf("Pressione ENTER para iniciar o primeiro turno...\n");
     while(readch() != 10);
-
 
     while (!gameState.gameOver) {
         if (realizarJogada(&gameState)) {

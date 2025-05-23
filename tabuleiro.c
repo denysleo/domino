@@ -78,6 +78,8 @@ Pedra *removerPecaDoInicio(Tabuleiro *tabuleiro) {
     for (int i = 0; i < tabuleiro->tamanho - 1; i++) {
         tabuleiro->pecas[i] = tabuleiro->pecas[i + 1];
     }
+    // CORREÇÃO: Nullify the last element after shifting
+    tabuleiro->pecas[tabuleiro->tamanho - 1] = NULL; 
     tabuleiro->tamanho--;
     removida->next = NULL;
     return removida;
@@ -87,8 +89,31 @@ Pedra *removerPecaDoFim(Tabuleiro *tabuleiro) {
     if (tabuleiro->tamanho == 0) return NULL;
 
     Pedra *removida = tabuleiro->pecas[tabuleiro->tamanho - 1];
+    // CORREÇÃO: Nullify the removed element
+    tabuleiro->pecas[tabuleiro->tamanho - 1] = NULL; 
     tabuleiro->tamanho--;
     removida->next = NULL;
     return removida;
 }
 
+int getLadoEsquerdoTabuleiro(const Tabuleiro *tabuleiro) {
+    if (tabuleiro->tamanho == 0) return -1;
+    return tabuleiro->pecas[0]->ladoA;
+}
+
+int getLadoDireitoTabuleiro(const Tabuleiro *tabuleiro) {
+    if (tabuleiro->tamanho == 0) return -1;
+    return tabuleiro->pecas[tabuleiro->tamanho - 1]->ladoB;
+}
+
+int isCompatible(const Pedra *pedra, const Tabuleiro *tabuleiro) {
+    if (tabuleiro->tamanho == 0) return 1;
+
+    int ladoEsquerdo = getLadoEsquerdoTabuleiro(tabuleiro);
+    int ladoDireito = getLadoDireitoTabuleiro(tabuleiro);
+
+    if (pedra->ladoA == ladoEsquerdo || pedra->ladoB == ladoEsquerdo) return 1;
+    if (pedra->ladoA == ladoDireito || pedra->ladoB == ladoDireito) return 1;
+
+    return 0;
+}

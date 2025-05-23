@@ -74,7 +74,7 @@ void distribuirPecas(Jogador *jogadores, Pedra *todas, Pedra **dorme) {
         jogadores[j].mao = NULL;
         jogadores[j].pontuacao = 0;
         printf("Digite o nome do %d Jogador \n", j + 1);
-	scanf("%s",jogadores[j].nome);
+	    scanf("%s",jogadores[j].nome);
     }
 
     for (int k = 0; k < 6; k++) {
@@ -166,3 +166,23 @@ Pedra *selecionarPedraNaMao(Jogador *jogador, const GameState *gameState) {
     return pedraSelecionada;
 }
 
+int getHandSize(const Jogador *jogador) {
+    int count = 0;
+    Pedra *current = jogador->mao;
+    while (current != NULL) {
+        count++;
+        current = current->next;
+    }
+    return count;
+}
+
+int hasCompatibleMove(const Jogador *jogador, const Tabuleiro *tabuleiro) {
+    Pedra *current = jogador->mao;
+    while (current != NULL) {
+        if (isCompatible(current, tabuleiro)) {
+            return 1;
+        }
+        current = current->next;
+    }
+    return 0;
+}
