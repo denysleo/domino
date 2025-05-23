@@ -17,6 +17,7 @@ int controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro);
 Pedra *removerPedraDaMao(Jogador *jogador, int ladoA, int ladoB);
 Pedra *selecionarPedraNaMao(Jogador *jogador, const GameState *gameState);
 void addPedraToMao(Jogador *jogador, Pedra *pedra);
+int calcularPontosDaMao(const Jogador *jogador);
 int getHandSize(const Jogador *jogador);
 int hasCompatibleMove(const Jogador *jogador, const Tabuleiro *tabuleiro);
 

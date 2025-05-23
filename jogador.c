@@ -34,6 +34,15 @@ void addPedraToMao(Jogador *jogador, Pedra *pedra) {
     pedra->next = jogador->mao;
     jogador->mao = pedra;
 }
+int calcularPontosDaMao(const Jogador *jogador) {
+    int totalPontos = 0;
+    Pedra *atual = jogador->mao;
+    while (atual != NULL) {
+        totalPontos += atual->ladoA + atual->ladoB;
+        atual = atual->next;
+    }
+    return totalPontos;
+}
 
 int controlarTurnos(Jogador *jogadores, Tabuleiro *tabuleiro) {
     int jogadorInicial = -1;
