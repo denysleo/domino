@@ -362,13 +362,23 @@ void iniciarJogo() {
 
 
     while (!gameState.gameOver) {
-        if (realizarJogada(&gameState)) {
-            gameState.gameOver = 1;
-            gameState.jogadorVencedorIndex = gameState.jogadorAtualIndex;
-        } else {
-            gameState.jogadorAtualIndex = (gameState.jogadorAtualIndex + 1) % 4;
+    if (keyhit()) {
+        int ch = readch();
+        if (ch == 27) {
+            if (menuPausa() == 1) {
+                gameState.gameOver = 1;
+                continue;
+            }
         }
     }
+    if (realizarJogada(&gameState)) {
+        gameState.gameOver = 1;
+        gameState.jogadorVencedorIndex = gameState.jogadorAtualIndex;
+    } else {
+        gameState.jogadorAtualIndex = (gameState.jogadorAtualIndex + 1) % 4;
+    }
+}
+
 
     screenClear();
     screenSetColor(CYAN, BLACK);

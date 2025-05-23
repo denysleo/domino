@@ -47,3 +47,17 @@ int menuInicial() {
     return opcao;
 }
 
+int menuPausa() {
+    screenClear();
+    screenSetColor(WHITE, BLUE);
+    printf("=== PAUSA ===\n");
+    printf("1 - Sair do jogo\n");
+    printf("Pressione qualquer outra tecla para continuar\n");
+    screenUpdate();
+
+    int ch = readch();
+    if (ch == '1') {
+        return 1;
+    }
+    return 0;
+}
