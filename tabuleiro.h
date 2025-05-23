@@ -14,5 +14,7 @@ void adicionarPecaNoCentro(Tabuleiro *tabuleiro, Pedra *p);
 void adicionarPecaNoInicio(Tabuleiro *tabuleiro, Pedra *p);
 void adicionarPecaNoFim(Tabuleiro *tabuleiro, Pedra *p);
 void exibirTabuleiro(const Tabuleiro *tabuleiro);
+Pedra *removerPecaDoInicio(Tabuleiro *tabuleiro);
+Pedra *removerPecaDoFim(Tabuleiro *tabuleiro);
 
 #endif

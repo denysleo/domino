@@ -7,6 +7,7 @@
 #define MAX_PECAS_TABULEIRO 28
 #define CAPACIDADE_INICIAL 10
 
+
 void iniciarTabuleiro(Tabuleiro *tabuleiro) {
     tabuleiro->pecas = (Pedra **)malloc(sizeof(Pedra *) * CAPACIDADE_INICIAL);
     tabuleiro->tamanho = 0;
@@ -17,13 +18,14 @@ void adicionarPecaNoCentro(Tabuleiro *tabuleiro, Pedra *p) {
     if (tabuleiro->tamanho >= tabuleiro->capacidade) {
         tabuleiro->capacidade *= 2;
         tabuleiro->pecas = (Pedra **)realloc(tabuleiro->pecas, sizeof(Pedra *) * tabuleiro->capacidade);
+        if (!tabuleiro->pecas) { fprintf(stderr, "Erro de realocacao de memoria (centro).\n"); exit(EXIT_FAILURE); }
     }
     if (tabuleiro->tamanho == 0) {
         tabuleiro->pecas[0] = p;
         tabuleiro->tamanho = 1;
         p->next = NULL;
     } else {
-        fprintf(stderr, "Aviso: adicionarPecaNoCentro só deve ser usada para a primeira peça.\n");
+        fprintf(stderr, "Aviso: adicionarPecaNoCentro so deve ser usada para a primeira peca.\n");
     }
 }
 
@@ -31,10 +33,7 @@ void adicionarPecaNoInicio(Tabuleiro *tabuleiro, Pedra *p) {
     if (tabuleiro->tamanho >= tabuleiro->capacidade) {
         tabuleiro->capacidade *= 2;
         tabuleiro->pecas = (Pedra **)realloc(tabuleiro->pecas, sizeof(Pedra *) * tabuleiro->capacidade);
-        if (!tabuleiro->pecas) {
-            fprintf(stderr, "Erro de alocação de memória ao expandir tabuleiro.\n");
-            exit(EXIT_FAILURE);
-        }
+        if (!tabuleiro->pecas) { fprintf(stderr, "Erro de realocacao de memoria (inicio).\n"); exit(EXIT_FAILURE); }
     }
 
     for (int i = tabuleiro->tamanho; i > 0; i--) {
@@ -49,10 +48,7 @@ void adicionarPecaNoFim(Tabuleiro *tabuleiro, Pedra *p) {
     if (tabuleiro->tamanho >= tabuleiro->capacidade) {
         tabuleiro->capacidade *= 2;
         tabuleiro->pecas = (Pedra **)realloc(tabuleiro->pecas, sizeof(Pedra *) * tabuleiro->capacidade);
-        if (!tabuleiro->pecas) {
-            fprintf(stderr, "Erro de alocação de memória ao expandir tabuleiro.\n");
-            exit(EXIT_FAILURE);
-        }
+        if (!tabuleiro->pecas) { fprintf(stderr, "Erro de realocacao de memoria (fim).\n"); exit(EXIT_FAILURE); }
     }
 
     tabuleiro->pecas[tabuleiro->tamanho] = p;
@@ -74,3 +70,25 @@ void exibirTabuleiro(const Tabuleiro *tabuleiro) {
     }
     printf("\n");
 }
+
+Pedra *removerPecaDoInicio(Tabuleiro *tabuleiro) {
+    if (tabuleiro->tamanho == 0) return NULL;
+
+    Pedra *removida = tabuleiro->pecas[0];
+    for (int i = 0; i < tabuleiro->tamanho - 1; i++) {
+        tabuleiro->pecas[i] = tabuleiro->pecas[i + 1];
+    }
+    tabuleiro->tamanho--;
+    removida->next = NULL;
+    return removida;
+}
+
+Pedra *removerPecaDoFim(Tabuleiro *tabuleiro) {
+    if (tabuleiro->tamanho == 0) return NULL;
+
+    Pedra *removida = tabuleiro->pecas[tabuleiro->tamanho - 1];
+    tabuleiro->tamanho--;
+    removida->next = NULL;
+    return removida;
+}
+
