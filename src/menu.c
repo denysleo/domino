@@ -26,7 +26,7 @@ int menuInicial(void) {
         if (mudou) {
                 screenClear();
             screenSetColor(WHITE, BLACK);
-            printf("===== MENU DOMINO ===== (ESC para Sair)\n\n");
+            printf("==== MENU DOMINO ==== (ESC para Sair)\n\n");
 
             for (int i = 0; i < numOpcoes; i++) {
                 if ((i + 1) == opcao)
