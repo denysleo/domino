@@ -1,49 +1,76 @@
 #include "menu.h"
-#include "screen.h"
-#include "keyboard.h"
-#include "timer.h"
+#include "cli-lib/include/screen.h"
+#include "cli-lib/include/keyboard.h"
 #include <stdio.h>
 
-int menuInicial() {
+#ifndef KEY_ESC
+#define KEY_ESC 27
+#endif
+#ifndef MENU_ACTION_QUIT
+#define MENU_ACTION_QUIT 0
+#endif
+
+int menuInicial(void) {
+    const char *opcoes[] = {
+        "Iniciar Jogo",
+        "Creditos (Exemplo)",
+        "Sair (via Opcao)"
+    };
+    const int numOpcoes = sizeof(opcoes) / sizeof(opcoes[0]);
+
     int opcao = 1;
     int tecla = 0;
-    int mudou = 1; // flag para redesenhar tela
+    int mudou = 1;
 
-    while (tecla != 10) {  // 10 = ENTER
+    while (1) {
         if (mudou) {
-            screenClear();
+                screenClear();
             screenSetColor(WHITE, BLACK);
-            printf("===== MENU =====\n\n");
+            printf("===== MENU DOMINO ===== (ESC para Sair)\n\n");
 
-            for (int i = 1; i <= 3; i++) {
-                if (i == opcao)
+            for (int i = 0; i < numOpcoes; i++) {
+                if ((i + 1) == opcao)
                     screenSetColor(YELLOW, BLACK);
                 else
                     screenSetColor(WHITE, BLACK);
 
-                if (i == 1)
-                    printf("%d. Iniciar Jogo\n", i);
-                else
-                    printf("%d. Opção %d\n", i, i);
+                printf("%d. %s\n", i + 1, opcoes[i]);
             }
 
+            screenSetColor(WHITE, BLACK);
+            printf("\nUse as setas CIMA/BAIXO e ENTER para selecionar.\n");
             screenUpdate();
-            mudou = 0; // tela atualizada, espera mudança
+            mudou = 0;
         }
 
         if (keyhit()) {
             tecla = readch();
 
-            if (tecla == 65 && opcao > 1) {
-                opcao--;
-                mudou = 1; // mudou seleção, redesenha
-            } else if (tecla == 66 && opcao < 3) {
-                opcao++;
-                mudou = 1; // mudou seleção, redesenha
+            if (tecla == 27) {
+                int prox1 = readch();
+                int prox2 = readch();
+                 if (prox1 == 91) {
+                    if (prox2 == 65 && opcao > 1) { // seta cima
+                        opcao--;
+                        mudou = 1;
+                    } else if (prox2 == 66 && opcao < numOpcoes) { // seta baixo
+                        opcao++;
+                        mudou = 1;
+                    }
+                } else {
+                    return MENU_ACTION_QUIT;
+                }
+            } else if (tecla == KEY_ESC) {
+                return MENU_ACTION_QUIT;
+            } else if (tecla == 10) {
+                break;
             }
         }
     }
 
+    if (opcao == numOpcoes) {
+        return MENU_ACTION_QUIT;
+    }
+
     return opcao;
 }
-
